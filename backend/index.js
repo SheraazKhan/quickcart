@@ -14,6 +14,10 @@ app.use("/api/auth", authRoutes);
 const productRoutes = require("./routes/productRoutes");
 app.use("/api/products", productRoutes);
 
+const userRoutes = require("./routes/userRoutes");
+app.use("/api/users", userRoutes);
+
+
 
 // Connect to MongoDB and start server
 mongoose.connect(process.env.MONGO_URI)
