@@ -6,6 +6,7 @@ const userSchema = new mongoose.Schema(
     email: { type: String, unique: true },
     password: String,
     profilePicture: String, 
+    favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: "Product" }] 
   },
   { timestamps: true }
 );
