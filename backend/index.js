@@ -1,11 +1,18 @@
 const express = require("express");
+
+const path = require("path");
 const mongoose = require("mongoose");
 const cors = require("cors");
 require("dotenv").config();
 
+
+
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+//Upload image
+app.use("/images", express.static(path.join(__dirname, "public/images")));
 
 // Import routes
 const authRoutes = require("./routes/authRoutes");
@@ -22,6 +29,9 @@ app.use("/api/orders", orderRoutes);
 
 const paymentRoutes = require("./routes/paymentRoutes");
 app.use("/api/payments", paymentRoutes);
+
+
+
 
 
 
