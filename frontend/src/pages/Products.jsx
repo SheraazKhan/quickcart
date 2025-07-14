@@ -131,6 +131,6 @@ const Products = () => {
       </div>
     </div>
   );
-};w
+};
 
 export default Products;
