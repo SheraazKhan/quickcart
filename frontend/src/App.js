@@ -13,6 +13,7 @@ import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import OrderSuccess from "./pages/OrderSuccess";
 import React from "react";
+import Footer from "./components/Footer";
 
 function App() {
   return (

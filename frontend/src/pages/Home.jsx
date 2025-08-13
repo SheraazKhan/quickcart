@@ -1,16 +1,63 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import axios from "axios";
+import API_BASE_URL from "../utils/api";
 
-
+// keep your existing assets:
 import heroImage from "../assets/images/hero.jpg";
 import deliveryIcon from "../assets/images/delivery.png";
 import discountIcon from "../assets/images/discount.png";
 import supportIcon from "../assets/images/support.png";
 
 const Home = () => {
+  const [loading, setLoading] = useState(true);
+  const [allProducts, setAllProducts] = useState([]);
+
+  // pull products once
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const { data } = await axios.get(`${API_BASE_URL}/api/products`);
+        if (mounted) setAllProducts(Array.isArray(data) ? data : []);
+      } catch (e) {
+        console.error("Failed to load products:", e);
+        if (mounted) setAllProducts([]);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
+    return () => (mounted = false);
+  }, []);
+
+  // choose featured (prefer items with `featured` or `isFeatured`; else take first 8)
+  const featured = useMemo(() => {
+    const flagged = allProducts.filter(p => p.featured || p.isFeatured);
+    const base = flagged.length ? flagged : allProducts;
+    return base.slice(0, 8);
+  }, [allProducts]);
+
+  const getImg = (img) => {
+    if (!img) return "/placeholder.jpg";
+    if (typeof img === "string") {
+      if (/^https?:\/\//i.test(img)) return img;
+      return `${API_BASE_URL}${img.startsWith("/") ? "" : "/"}${img}`;
+    }
+    if (img?.url) return img.url;
+    return "/placeholder.jpg";
+  };
+
+  const addToCart = (product) => {
+    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+    const idx = cart.findIndex((i) => i._id === product._id);
+    if (idx >= 0) cart[idx].quantity += 1;
+    else cart.push({ ...product, quantity: 1 });
+    localStorage.setItem("cart", JSON.stringify(cart));
+  };
+
   return (
     <div className="bg-gray-50">
-      
+      {/* Hero */}
       <section
         className="py-20 px-4 text-center bg-cover bg-center"
         style={{ backgroundImage: `url(${heroImage})` }}
@@ -39,7 +86,7 @@ const Home = () => {
         </div>
       </section>
 
-      
+      {/* Perks */}
       <section className="py-12 px-6 bg-white">
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
           <div>
@@ -60,28 +107,62 @@ const Home = () => {
         </div>
       </section>
 
-      
+      {/* Featured Products (live) */}
       <section className="py-12 px-6 bg-gray-100">
         <div className="max-w-6xl mx-auto text-center mb-8">
           <h2 className="text-2xl font-bold text-gray-800">Featured Products</h2>
           <p className="text-gray-600 mt-2">Popular picks from our store</p>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 max-w-6xl mx-auto">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="bg-white p-4 rounded shadow hover:shadow-md transition">
-              <img
-                src={`https://placehold.co/300x200?text=Product+${i}`}
-                alt={`Product ${i}`}
-                className="mb-4 w-full h-40 object-cover rounded"
-              />
-              <h3 className="font-semibold text-lg">Product {i}</h3>
-              <p className="text-green-600 font-bold">$29.99</p>
-            </div>
-          ))}
+
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 max-w-6xl mx-auto">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="bg-white p-4 rounded shadow ring-1 ring-black/5 animate-pulse">
+                <div className="w-full h-40 rounded bg-gray-200 mb-4" />
+                <div className="h-4 w-2/3 bg-gray-200 rounded mb-2" />
+                <div className="h-4 w-1/3 bg-gray-200 rounded" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 max-w-6xl mx-auto">
+            {featured.map((p) => (
+              <div key={p._id} className="bg-white p-4 rounded shadow ring-1 ring-black/5">
+                <img
+                  src={getImg(p.image)}
+                  alt={p.name}
+                  className="mb-4 w-full h-40 object-contain rounded bg-white"
+                  onError={(e) => (e.currentTarget.src = "/placeholder.jpg")}
+                />
+                <div className="text-xs text-gray-500">
+                  {(p.countInStock ?? 0) > 0 ? "In stock" : "Out of stock"}
+                </div>
+                <h3 className="font-semibold line-clamp-1">{p.name}</h3>
+                <div className="mt-2 flex items-center justify-between">
+                  <span className="text-green-600 font-bold">${Number(p.price || 0).toFixed(2)}</span>
+                  <button
+                    onClick={() => addToCart(p)}
+                    className="px-3 py-1.5 rounded bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold"
+                  >
+                    Add to cart
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className="text-center mt-8">
+          <Link
+            to="/products"
+            className="inline-flex items-center justify-center px-5 py-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold"
+          >
+            Browse All Products
+          </Link>
         </div>
       </section>
 
-      
+      {/* Newsletter */}
       <section className="bg-white py-12 px-6 text-center">
         <div className="max-w-xl mx-auto">
           <h2 className="text-2xl font-bold mb-2">Stay Updated</h2>

@@ -1,0 +1,9 @@
+<svg width="132" height="28" viewBox="0 0 132 28" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <rect width="132" height="28" rx="6" fill="white"/>
+  <g>
+    <circle cx="14" cy="14" r="10" stroke="#111827" stroke-width="3"/>
+    <path d="M20 20 L26 26" stroke="#111827" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="14" cy="14" r="6" fill="#4f46e5"/>
+  </g>
+  <text x="36" y="19" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="700" fill="#111827">QuickCart</text>
+</svg>
